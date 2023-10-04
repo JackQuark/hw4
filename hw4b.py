@@ -20,6 +20,7 @@ time = rootgrp.variables['time'][:]
 lat  = rootgrp.variables['lat' ][:]
 lon  = rootgrp.variables['lon' ][:]
 lev  = rootgrp.variables['lev' ][:]*100
+g    = 9.8
 
 #save pressure data from 1d array to 3d array,
 #where dlev(i,:,:) save each layer of pressure.
