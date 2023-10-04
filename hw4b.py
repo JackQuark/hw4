@@ -3,22 +3,20 @@ import matplotlib.pyplot as plt
 import netCDF4           as nc
 import sys
 
-#tin        = str(sys.argv[1])
-tin        = '2016.07.05'
+#save input date
+tin        = str(sys.argv[1])
 tins       = tin.split('.')
 if(int(tins[1]) == 7):
     t = int(tins[2]) + 15
 else:
     t = int(tins[2]) - 15
 
+#declare some arrays and value.
 IVT = IVTu = IVTv = IVTU = IVTV = np.zeros((201, 321))
-mlon, mlat = np.loadtxt('Easia_coastline.txt', dtype=float, comments=None, delimiter=',', skiprows=1, unpack=True)
-mlon       = np.where(mlon > -10000, mlon, np.nan)
-mlat       = np.where(mlat > -10000, mlat, np.nan)
 g          = 9.8
 
-rootgrp = nc.Dataset('ERA5_Easia.nc')
-
+#loading data from .nc file.
+rootgrp = nc.Dataset('/home/B12/b12209017/hw4/hw4/ERA5_Easia.nc')
 q_d  = rootgrp.variables['q']
 u_d  = rootgrp.variables['u']
 v_d  = rootgrp.variables['v']
@@ -27,26 +25,35 @@ lat  = rootgrp.variables['lat' ][:]
 lon  = rootgrp.variables['lon' ][:]
 lev  = rootgrp.variables['lev' ][:]*100
 
+#save pressure data from 1d array to 3d array,
+#where dlev(i,:,:) save each layer of pressure.
 dlev = np.zeros((len(lev), len(lat), len(lon)))
 for i in range(len(lev)):
     dlev[i, :, :][:] = np.full((201, 321), lev[i])
 
+#calculate IVTu/IVTv in each layer of pressure.
 IVTu = (((q_d[t,:-1]*u_d[t,:-1]+q_d[t,1:]*u_d[t,1:])*(dlev[:-1]-dlev[1:]))*(-1/g)/2)
 IVTv = (((q_d[t,:-1]*v_d[t,:-1]+q_d[t,1:]*v_d[t,1:])*(dlev[:-1]-dlev[1:]))*(-1/g)/2)
 
-#sum of IVTu/IVTv in 31 layers of pressure, saving in a 2d array.
+#sum of IVTu/IVTv in 31 layers of pressure, saving in a 2d array,
+#and use them to calculate IVT(2d array(len(lat), len(lon))).
 IVTU = IVTu[:,:,:].sum(0)
 IVTV = IVTv[:,:,:].sum(0)
-
 IVT  = np.sqrt(IVTU**2 + IVTV**2)
 
+#loading data of East Asia map
+mlon, mlat = np.loadtxt('/home/B12/b12209017/hw4/hw4/Easia_coastline.txt', dtype=float, comments=None, delimiter=',', skiprows=1, unpack=True)
+mlon       = np.where(mlon > -123456, mlon, np.nan)
+mlat       = np.where(mlat > -123456, mlat, np.nan)
+
+#figure set
 plt.subplots(1, 1, figsize=(8,6))
 plt.title('IVT [kg/m/s] 2016.%02d.%02d' %(int(tins[1]), int(tins[2])))
 plt.xlim([80, 160])
 plt.ylim([-10, 40])
-plt.plot(mlon, mlat, 'k')
 plt.xlabel('Longitude')
 plt.ylabel('Latitude')
+plt.plot(mlon, mlat, 'k')
 r = np.linspace(100, 1000, 10)
 CS=plt.contourf(lon, lat, IVT[:,:], levels = r, cmap = plt.cm.Blues, extend = 'both')
 CS.set_cticks = r
