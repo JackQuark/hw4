@@ -4,12 +4,11 @@ import netCDF4           as nc
 import sys
 
 #save input limit
-#n = int(sys.argv[1])
-n = 450
+n = int(sys.argv[1])
 g = 9.8
 
 #loading data from .nc file.
-rootgrp = nc.Dataset('ERA5_Easia.nc')
+rootgrp = nc.Dataset('/home/B12/b12209017/hw4/hw4/ERA5_Easia.nc')
 IVT  = np.zeros((31, 201, 321))
 q_d  = rootgrp.variables['q']
 t_d  = rootgrp.variables['t']
@@ -39,7 +38,7 @@ boolIVT    = np.where(boolIVT == 0., boolIVT, 1)
 BoolIVT    = (boolIVT[:,:,:].sum(0))/31
 
 #loading data of East Asia map
-mlon, mlat = np.loadtxt('Easia_coastline.txt', dtype=float, comments=None, delimiter=',', skiprows=1, unpack=True)
+mlon, mlat = np.loadtxt('/home/B12/b12209017/hw4/hw4/Easia_coastline.txt', dtype=float, comments=None, delimiter=',', skiprows=1, unpack=True)
 mlon       = np.where(mlon > -123456, mlon, np.nan)
 mlat       = np.where(mlat > -123456, mlat, np.nan)
 
