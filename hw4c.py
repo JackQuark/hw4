@@ -4,11 +4,12 @@ import netCDF4           as nc
 import sys
 
 #save input limit
-n = int(sys.argv[1])
+#n = int(sys.argv[1])
+n = 450
 g = 9.8
 
 #loading data from .nc file.
-rootgrp = nc.Dataset('/home/B12/b12209017/hw4/hw4/ERA5_Easia.nc')
+rootgrp = nc.Dataset('ERA5_Easia.nc')
 IVT  = np.zeros((31, 201, 321))
 q_d  = rootgrp.variables['q']
 t_d  = rootgrp.variables['t']
@@ -27,14 +28,9 @@ for i in range(len(lev)):
 
 #calculate each day's IVT value, save in a 3d array with shape(31, 201, 321)
 for j in range(len(time)):
-    #reset arrays
-    IVTu = IVTv = IVTU = IVTV = np.empty(0)
-
-    IVTu = (((q_d[j,:-1]*u_d[j,:-1]+q_d[j,1:]*u_d[j,1:])*(dlev[:-1]-dlev[1:]))*(-1/g)/2)
-    IVTv = (((q_d[j,:-1]*v_d[j,:-1]+q_d[j,1:]*v_d[j,1:])*(dlev[:-1]-dlev[1:]))*(-1/g)/2)
-    IVTU = IVTu[:,:,:].sum(0)
-    IVTV = IVTv[:,:,:].sum(0)
-    IVT[j] = np.sqrt(IVTU**2 + IVTV**2)
+    IVTu = (((q_d[j,:-1]*u_d[j,:-1]+q_d[j,1:]*u_d[j,1:])*(dlev[:-1]-dlev[1:]))*(-1/g)/2).sum(0)
+    IVTv = (((q_d[j,:-1]*v_d[j,:-1]+q_d[j,1:]*v_d[j,1:])*(dlev[:-1]-dlev[1:]))*(-1/g)/2).sum(0)
+    IVT[j] = np.sqrt(IVTu**2 + IVTv**2)
 
 #if IVT>n modify it to 1, and others to 0
 boolIVT    = np.where(IVT > n, IVT, 0)
@@ -43,7 +39,7 @@ boolIVT    = np.where(boolIVT == 0., boolIVT, 1)
 BoolIVT    = (boolIVT[:,:,:].sum(0))/31
 
 #loading data of East Asia map
-mlon, mlat = np.loadtxt('/home/B12/b12209017/hw4/hw4/Easia_coastline.txt', dtype=float, comments=None, delimiter=',', skiprows=1, unpack=True)
+mlon, mlat = np.loadtxt('Easia_coastline.txt', dtype=float, comments=None, delimiter=',', skiprows=1, unpack=True)
 mlon       = np.where(mlon > -123456, mlon, np.nan)
 mlat       = np.where(mlat > -123456, mlat, np.nan)
 
