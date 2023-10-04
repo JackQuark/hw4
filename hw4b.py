@@ -11,10 +11,6 @@ if(int(tins[1]) == 7):
 else:
     t = int(tins[2]) - 15
 
-#declare some arrays and value.
-IVT = IVTu = IVTv = IVTU = IVTV = np.zeros((201, 321))
-g          = 9.8
-
 #loading data from .nc file.
 rootgrp = nc.Dataset('/home/B12/b12209017/hw4/hw4/ERA5_Easia.nc')
 q_d  = rootgrp.variables['q']
@@ -31,15 +27,11 @@ dlev = np.zeros((len(lev), len(lat), len(lon)))
 for i in range(len(lev)):
     dlev[i, :, :][:] = np.full((201, 321), lev[i])
 
-#calculate IVTu/IVTv in each layer of pressure.
-IVTu = (((q_d[t,:-1]*u_d[t,:-1]+q_d[t,1:]*u_d[t,1:])*(dlev[:-1]-dlev[1:]))*(-1/g)/2)
-IVTv = (((q_d[t,:-1]*v_d[t,:-1]+q_d[t,1:]*v_d[t,1:])*(dlev[:-1]-dlev[1:]))*(-1/g)/2)
-
-#sum of IVTu/IVTv in 31 layers of pressure, saving in a 2d array,
+#calculate sum of IVTu/IVTv in 31 layers of pressure,
 #and use them to calculate IVT(2d array(len(lat), len(lon))).
-IVTU = IVTu[:,:,:].sum(0)
-IVTV = IVTv[:,:,:].sum(0)
-IVT  = np.sqrt(IVTU**2 + IVTV**2)
+IVTu = (((q_d[t,:-1]*u_d[t,:-1]+q_d[t,1:]*u_d[t,1:])*(dlev[:-1]-dlev[1:]))*(-1/g)/2).sum(0)
+IVTv = (((q_d[t,:-1]*v_d[t,:-1]+q_d[t,1:]*v_d[t,1:])*(dlev[:-1]-dlev[1:]))*(-1/g)/2).sum(0)
+IVT  = np.sqrt(IVTu**2 + IVTv**2)
 
 #loading data of East Asia map
 mlon, mlat = np.loadtxt('/home/B12/b12209017/hw4/hw4/Easia_coastline.txt', dtype=float, comments=None, delimiter=',', skiprows=1, unpack=True)
